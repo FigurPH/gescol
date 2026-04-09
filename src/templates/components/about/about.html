@@ -1,27 +1,52 @@
-<div class="welcome-card" style="animation: fadeIn 0.3s; width: 100%; margin: 0 auto;">
-    <h2 style="color: var(--magalu-blue); margin: 0 0 15px 0;">ℹ️ Sobre o GesCol</h2>
+<div class="welcome-card" style="animation: fadeIn 0.3s; width: 100%; max-width: 900px; margin: 0 auto; text-align: left;">
+    <h2 style="color: var(--magalu-blue); border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px;">
+        📖 Guia e Informações do Sistema
+    </h2>
 
-    <p>O <strong>GesCol</strong> (Gerenciamento de Coletores) é um sistema interno desenvolvido
-        para controlar o fluxo de coletores utilizados pelos colaboradores dos Centros de
-        Distribuição Magalu.</p>
+    <section class="guide-section" style="margin-bottom: 30px;">
+        <h3 style="color: #333;">🚀 Guia Rápido de Uso</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 15px;">
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid var(--magalu-blue);">
+                <h4 style="margin-top: 0;">1. Atribuição</h4>
+                <p style="font-size: 0.9rem;">Vá em <strong>Atribuições</strong>, digite a matrícula do colaborador e informe um equipamento disponível. Clique em "Confirmar Entrega".</p>
+            </div>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid var(--success);">
+                <h4 style="margin-top: 0;">2. Devolução</h4>
+                <p style="font-size: 0.9rem;">Vá em <strong>Atribuições</strong>, digite a matrícula do colaborador e informe o equipamento que deseja devolver. Clique em "Confirmar Devolução".</p>
+            </div>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #ff9800;">
+                <h4 style="margin-top: 0;">3. Consultas</h4>
+                <p style="font-size: 0.9rem;">Use a aba <strong>Relatórios</strong> para buscar o histórico de uso por data, colaborador, equipamento ou filial (CD).</p>
+            </div>
+        </div>
+    </section>
 
-    <p>Versão atual: 2.0.1</p>
+    <section class="info-section" style="background: #fff; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+        <h3 style="margin-top: 0; color: #333;">ℹ️ Sobre o GesCol</h3>
+        <p>O <strong>GesCol</strong> é a plataforma oficial de gestão de ativos logísticos, garantindo visibilidade e responsabilidade sobre o uso de coletores de dados nos Centros de Distribuição.</p>
+        
+        <table style="width: 100%; margin-top: 15px; border-collapse: collapse; font-size: 0.9rem;">
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px 0; font-weight: bold; width: 30%;">Versão do Sistema</td>
+                <td style="padding: 10px 0;">2.2.0 (Stable)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px 0; font-weight: bold;">Licença de Uso</td>
+                <td style="padding: 10px 0;">GNU GPL v3.0 (Open Source)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px 0; font-weight: bold;">Tecnologia Base</td>
+                <td style="padding: 10px 0;">FastAPI + HTMX + PostgreSQL</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px 0; font-weight: bold;">Manutenção</td>
+                <td style="padding: 10px 0;">Equipe de TI CD / Magalu Style</td>
+            </tr>
+        </table>
+    </section>
 
-    <p>Funcionalidades principais:</p>
-    <ul>
-        <li>Atribuição e devolução de coletores.</li>
-        <li>Relatórios históricos de utilização.</li>
-        <li>Gestão de usuários e permissões.</li>
-        <li>Dashboard com estatísticas por CD.</li>
-    </ul>
-
-    <p>Desenvolvido com <a href="https://fastapi.tiangolo.com/" target="_blank">FastAPI</a>,
-        <a href="https://jinja.palletsprojects.com/" target="_blank">Jinja2</a> e HTMX para
-        uma experiência suave em SPA.
-    </p>
-
-    <p style="margin-top:20px; color:#666; font-size:0.9rem;">&copy; 2026 Magalu - Equipe de TI</p>
-
+    <footer style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; color: #888; font-size: 0.85rem;">
+        <span>&copy; 2026 GesCol - Gestão de Ativos Logísticos</span>
+        <span>Escalabilidade via Gunicorn</span>
+    </footer>
 </div>
-
-<span style="font-size:0.7rem; color: rgb(222, 224, 224); position: absolute; bottom: 0">~Figur</span>

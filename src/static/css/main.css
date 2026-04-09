@@ -16,6 +16,10 @@
     --radius: 12px;
 }
 
+p {
+    text-align: justify;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
