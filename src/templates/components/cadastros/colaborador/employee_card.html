@@ -1,0 +1,17 @@
+<div style="width: 100%; text-align: left; animation: fadeIn 0.2s;">
+    <div style="background: var(--magalu-blue); color: white; padding: 15px; border-radius: 10px 10px 0 0;">
+        <h3 style="margin: 0;">Colaborador Encontrado</h3>
+    </div>
+    <div style="padding: 20px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 10px 10px;">
+        <p style="margin-bottom: 10px;"><strong>Nome:</strong> {{ employee.name }}</p>
+        <p style="margin-bottom: 10px;"><strong>Setor:</strong> {{ employee.department }}</p>
+        <p style="margin-bottom: 0;"><strong>Cargo:</strong> {{ employee.role }}</p>
+        
+        {% if employee.is_active == False %}
+        <div style="margin-top: 15px; background: #ffebee; color: #c62828; padding: 10px; border-radius: 5px; font-weight: bold; text-align: center;">
+            ⚠️ ATENÇÃO: Colaborador Inativo!
+        </div>
+        {% endif %}
+    </div>
+    <input type="hidden" name="employee_id" value="{{ employee.id }}">
+</div>

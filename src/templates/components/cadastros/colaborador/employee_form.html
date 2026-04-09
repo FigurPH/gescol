@@ -1,0 +1,44 @@
+<div class="welcome-card" style="max-width: 600px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="color: var(--magalu-blue);">Novo Colaborador</h2>
+        <button hx-get="/colaboradores" hx-target="#content" class="magalu-btn"
+            style="width: auto; background: #666;">Cancelar</button>
+    </div>
+
+    <form hx-post="/colaboradores/save" hx-target="#content">
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">ID Magalu</label>
+            <input type="number" name="id_magalu" class="magalu-input" placeholder="Ex: 123456" required>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Nome Completo</label>
+            <input type="text" name="name" class="magalu-input" placeholder="Nome do colaborador" required>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Cargo</label>
+            <input type="text" name="role" class="magalu-input" placeholder="Ex: Conferente II" required>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Turno</label>
+            <select name="turno" class="magalu-input" required>
+                <option value="" disabled selected>Selecione o turno</option>
+                <option value="0">ADM</option>
+                <option value="1">1ºT</option>
+                <option value="2">2ºT</option>
+                <option value="3">3ºT</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Centro de Distribuição (CD)</label>
+            <input type="text" name="cd" class="magalu-input" value="{{ fixed_cd }}" {% if admin_level==9 %}readonly
+                style="background: #f0f0f0;" {% endif %} placeholder="Ex: 050 ou 1200" maxlength="4" required>
+            <small style="color: #666;">Use 3 dígitos (ex: 050) ou 4 dígitos (ex: 2900).</small>
+        </div>
+
+        <button type="submit" class="magalu-btn">Salvar Colaborador</button>
+    </form>
+</div>

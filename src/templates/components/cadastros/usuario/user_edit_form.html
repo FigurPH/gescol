@@ -1,0 +1,38 @@
+<div class="welcome-card" style="max-width: 600px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="color: var(--magalu-blue);">Editar Acesso: {{ user_to_edit.name }}</h2>
+        <button hx-get="/cadastros/usuarios" hx-target="#content" class="magalu-btn" style="width: auto; background: #666;">Cancelar</button>
+    </div>
+
+    <form hx-post="/cadastros/usuarios/update/{{ user_to_edit.id }}" hx-target="#content">
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--magalu-blue);">
+            <p><strong>Colaborador:</strong> {{ user_to_edit.name }}</p>
+            <p><strong>CD Atual:</strong> {{ user_to_edit.cd }}</p>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="font-weight: bold;">Username (Login)</label>
+            <input type="text" name="username" class="magalu-input" value="{{ user_to_edit.username }}" required>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="font-weight: bold;">Nova Senha</label>
+            <input type="password" name="password" class="magalu-input" placeholder="Deixe em branco para manter a atual">
+            <small style="color: #666;">Só preencha se desejar resetar a senha do utilizador.</small>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="font-weight: bold;">Nível de Acesso</label>
+            <select name="user_level" class="magalu-input" required>
+                <option value="1" {% if user_to_edit.user_level == 1 %}selected{% endif %}>1 - Usuário Normal</option>
+                <option value="2" {% if user_to_edit.user_level == 2 %}selected{% endif %}>2 - Liderança</option>
+                {% if admin_level == 10 %}
+                <option value="9" {% if user_to_edit.user_level == 9 %}selected{% endif %}>9 - Admin Local</option>
+                <option value="10" {% if user_to_edit.user_level == 10 %}selected{% endif %}>10 - Super Admin</option>
+                {% endif %}
+            </select>
+        </div>
+
+        <button type="submit" class="magalu-btn">Guardar Alterações</button>
+    </form>
+</div>

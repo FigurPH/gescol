@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GesCol - Gerenciamento de Coletores v2.0</title>
+
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <strong>GesCol</strong>
+        </div>
+
+        <div class="nav-right">
+            <ul class="nav-links">
+                <li><a hx-get="/atribuicoes" hx-target="#content" hx-push-url="false">Atribuições</a></li>
+                <li><a hx-get="/dashboard" hx-target="#content" hx-push-url="false">Dashboard</a></li>
+                <li><a hx-get="/relatorios" hx-target="#content" hx-push-url="false">Relatórios</a></li>
+                <li><a hx-get="/sobre" hx-target="#content" hx-push-url="false">Sobre</a></li>
+
+                {% if user_level >= 9 %}
+                <li><a hx-get="/cadastros/hub" hx-target="#content" hx-push-url="false" style="color: #ffeb3b;">⚙️
+                        Cadastros</a></li>
+                {% endif %}
+            </ul>
+
+            <div class="profile-dropdown">
+                <div class="profile-trigger" onclick="toggleDropdown(event)" id="profileBtn">
+                    <span class="user-welcome-text">{{ user_name }}</span>
+                    <div class="profile-btn">👤</div>
+                </div>
+
+                <div id="myDropdown" class="dropdown-content">
+                    <a hx-get="/auth/perfil" hx-target="#content" onclick="toggleDropdown(event)">👤 Meu Perfil</a>
+                    <hr style="border: 0; border-top: 1px solid #eee; margin: 0;">
+                    <a href="/auth/logout" style="color: var(--danger);">🚪 Sair</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main id="content">
+        {% if partial_template %}
+        {% include partial_template %}
+        {% else %}
+        <div class="welcome-card">
+            <h1>Olá, {{ user_name }}!</h1>
+            <p>Seja bem-vindo ao sistema de controle de coletores.</p>
+            <p style="margin-top: 10px; color: #666;">Selecione uma opção no menu acima para começar.</p>
+        </div>
+        {% endif %}
+    </main>
+
+    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
+
+    <script src="/static/js/app.js"></script>
+
+    <style>
+    @keyframes slideInX {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    </style>
+    <script>
+        // Função para abrir/fechar o menu de perfil
+        function toggleDropdown(event) {
+            // Impede que o clique feche o menu imediatamente via window.onclick
+            if (event) event.stopPropagation();
+            const dropdown = document.getElementById("myDropdown");
+            dropdown.classList.toggle("show-dropdown");
+        }
+
+        // Fecha o dropdown se o usuário clicar em qualquer lugar fora dele
+        window.onclick = function (event) {
+            const dropdown = document.getElementById("myDropdown");
+            if (dropdown && dropdown.classList.contains('show-dropdown')) {
+                // Verifica se o clique não foi no próprio botão ou trigger
+                if (!event.target.closest('.profile-trigger')) {
+                    dropdown.classList.remove('show-dropdown');
+                }
+            }
+        }
+
+        // Configuração global do HTMX para lidar com erros de rede ou sessão expirada
+        document.body.addEventListener('htmx:responseError', function (evt) {
+            if (evt.detail.xhr.status === 401) {
+                window.location.href = '/auth/login';
+            } else {
+                alert("Erro na requisição. Verifique sua conexão.");
+            }
+        });
+    </script>
+
+</body>
+
+</html>

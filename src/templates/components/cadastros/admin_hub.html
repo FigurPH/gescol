@@ -1,0 +1,50 @@
+<div class="welcome-card">
+    <h2 style="margin-bottom: 20px; color: var(--magalu-blue);">Painel de Cadastros</h2>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+        
+        <div class="card-hub" hx-get="/colaboradores" hx-target="#content" style="cursor: pointer;">
+            <span style="font-size: 2rem;">👥</span>
+            <h3>Colaboradores</h3>
+            <p>Gestão de pessoal e cargos.</p>
+        </div>
+
+        <div class="card-hub" hx-get="/cadastros/usuarios" hx-target="#content" style="cursor: pointer;">
+            <span style="font-size: 2rem;">🔑</span>
+            <h3>Usuários</h3>
+            <p>Controle de acessos e níveis.</p>
+        </div>
+
+        <div class="card-hub" hx-get="/cadastros/coletores" hx-target="#content" style="cursor: pointer;">
+            <span style="font-size: 2rem;">📦</span>
+            <h3>Coletores</h3>
+            <p>Inventário de equipamentos</p>
+        </div>
+
+        {% if user_level == 10 %}
+        <div class="card-hub" hx-get="/cadastros/sessions" hx-target="#content" style="cursor: pointer; border-color: #ffd700;">
+            <span style="font-size: 2rem;">🌐</span>
+            <h3>Sessões</h3>
+            <p>Monitoramento em tempo real.</p>
+        </div>
+        {% endif %}
+        
+    </div>
+</div>
+
+<style>
+    .card-hub {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        border: 2px solid #f0f0f0;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    .card-hub:hover {
+        border-color: var(--magalu-blue);
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .card-hub h3 { color: var(--magalu-blue); margin-bottom: 10px; }
+</style>

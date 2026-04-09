@@ -1,0 +1,57 @@
+<div class="welcome-card" style="max-width: 550px; margin: 0 auto; animation: fadeIn 0.3s;">
+    <h2 style="color: var(--magalu-blue); margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+        {{ "Editar Coletor" if collector else "Novo Coletor" }}
+    </h2>
+
+    <form
+        hx-post="{{ '/cadastros/coletores/atualizar/' + (collector.id|string) if collector else '/cadastros/coletores/salvar' }}"
+        hx-target="#content">
+
+        <!-- CD do Coletor -->
+        {% if user_level == 10 %}
+        <div style="margin-bottom: 15px; text-align: left;">
+            <label style="font-weight: bold; display: block; margin-bottom: 5px;">CD (Centro de Distribuição)</label>
+            <input type="number" name="cd" class="magalu-input" value="{{ collector.cd if collector else admin_cd }}" required>
+        </div>
+        {% else %}
+        <input type="hidden" name="cd" value="{{ collector.cd if collector else admin_cd }}">
+        {% endif %}
+
+        <div style="margin-bottom: 15px; text-align: left;">
+            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Nome / Patrimônio</label>
+            <input type="text" name="name" class="magalu-input" value="{{ collector.name if collector else '' }}"
+                required oninput="this.value = this.value.toUpperCase()">
+        </div>
+
+        <div style="margin-bottom: 15px; text-align: left;">
+            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Modelo</label>
+            <input type="text" name="model" class="magalu-input" value="{{ collector.model if collector else '' }}"
+                required oninput="this.value = this.value.replace(/[^a-zA-Z0-9 ]/g, '')">
+        </div>
+
+        <div style="margin-bottom: 15px; text-align: left;">
+            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Número de Série</label>
+            <input type="text" name="serialnumber" class="magalu-input"
+                style="text-transform: uppercase; font-weight: bold; color: var(--magalu-blue);"
+                value="{{ collector.serialnumber if collector else '' }}" required
+                oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')">
+        </div>
+
+        {% if collector %}
+        <div style="margin-bottom: 20px; text-align: left;">
+            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Status do Equipamento</label>
+            <select name="is_active" class="magalu-input">
+                <option value="True" {{ 'selected' if collector.is_active else '' }}>✅ ATIVO (Disponível)</option>
+                <option value="False" {{ 'selected' if not collector.is_active else '' }}>⚠️ INATIVO (Manutenção/Perda)
+                </option>
+            </select>
+        </div>
+        {% endif %}
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="submit" class="magalu-btn">Confirmar</button>
+            <button type="button" class="magalu-btn" style="background: #6c757d;" hx-get="/cadastros/coletores"
+                hx-target="#content">Cancelar</button>
+        </div>
+    </form>
+</div>

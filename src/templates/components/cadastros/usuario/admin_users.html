@@ -1,0 +1,40 @@
+<div class="welcome-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>Gestão de Usuários</h2>
+        <button class="magalu-btn" style="width: auto; padding: 8px 15px;">+ Novo Usuário</button>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; background: white;">
+            <thead>
+                <tr style="background: #f8f9fa; border-bottom: 2px solid var(--magalu-blue);">
+                    <th style="padding: 12px; text-align: left;">Nome</th>
+                    <th style="padding: 12px; text-align: left;">Username</th>
+                    <th style="padding: 12px; text-align: left;">CD</th>
+                    <th style="padding: 12px; text-align: left;">Nível</th>
+                    <th style="padding: 12px; text-align: center;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;">{{ user.name }}</td>
+                    <td style="padding: 12px;">{{ user.username }}</td>
+                    <td style="padding: 12px;">{{ user.cd }}</td>
+                    <td style="padding: 12px;">
+                        <span
+                            style="padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; 
+                            background: {% if user.user_level >= 9 %}#ffebee; color: #c62828;{% else %}#e3f2fd; color: #1565c0;{% endif %}">
+                            Level {{ user.user_level }}
+                        </span>
+                    </td>
+                    <td style="padding: 12px; text-align: center;">
+                        <button class="magalu-btn"
+                            style="width: auto; background: #666; padding: 5px 10px; font-size: 0.8rem;">Editar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

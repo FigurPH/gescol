@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GesCol - Login</title>
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+
+<body class="login-page">
+    <div class="login-card">
+        <h2>GesCol</h2>
+        <p class="login-subtitle">Gerenciamento de Coletores</p>
+
+        <form hx-post="/auth/login" hx-target="#error-msg" hx-swap="innerHTML">
+            <input type="text" name="username" class="magalu-input" placeholder="Usuário" required>
+            <input type="password" name="password" class="magalu-input" placeholder="Senha" required>
+
+            <div id="error-msg" style="margin-bottom: 15px;"></div>
+
+            <button type="submit" class="magalu-btn">Entrar</button>
+        </form>
+    </div>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</body>
+
+</html>

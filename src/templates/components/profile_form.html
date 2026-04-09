@@ -1,0 +1,55 @@
+<div class="welcome-card" style="max-width: 450px; margin: 0 auto;">
+    <h2 style="color: var(--magalu-blue); margin-bottom: 20px;">👤 Alterar Senha</h2>
+    
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffa000;">
+        <p style="font-size: 0.9rem; color: #666;">Para sua segurança, confirme sua senha atual antes de definir uma nova.</p>
+    </div>
+
+    <form hx-post="/auth/perfil/trocar-senha" hx-target="#profile-msg">
+        <div style="margin-bottom: 15px;">
+            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Senha Atual</label>
+            <input type="password" name="senha_atual" class="magalu-input" required>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+        
+        <div style="margin-bottom: 15px;">
+            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Nova Senha</label>
+            <input type="password" name="nova_senha" class="magalu-input" required minlength="4">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label style="font-weight: bold; display: block; margin-bottom: 5px;">Repita a Nova Senha</label>
+            <input type="password" name="confirmar_senha" class="magalu-input" required>
+        </div>
+
+        <div id="profile-msg"></div> <button type="submit" class="magalu-btn">Confirmar Alteração</button>
+    </form>
+    <script>
+        (function() {
+            const pass = document.getElementById('nova_senha');
+            const conf = document.getElementById('confirmar_senha');
+            const errorMsg = document.getElementById('password-error');
+            const btn = document.getElementById('btn-submit-profile');
+
+            function validate() {
+                if (conf.value.length > 0 && pass.value !== conf.value) {
+                    errorMsg.style.display = 'block';
+                    conf.style.borderColor = 'red';
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                } else {
+                    errorMsg.style.display = 'none';
+                    conf.style.borderColor = '#ccc';
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                }
+            }
+
+            pass.addEventListener('input', validate);
+            conf.addEventListener('input', validate);
+        })();
+    </script>
+</div>

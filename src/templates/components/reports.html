@@ -1,0 +1,174 @@
+<div class="welcome-card" style="animation: fadeIn 0.3s; width: 100%; margin: 0 auto;">
+    <div
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">
+        <h2 style="color: var(--magalu-blue); margin: 0;">📊 Relatórios de Atribuições</h2>
+        <span class="badge badge-active">{{ attributions|length }} registros</span>
+    </div>
+
+    <!-- Filtros -->
+    <div
+        style="background: #f8f9fa; padding: 20px; border-radius: 12px; border: 1px solid #e0e0e0; margin-bottom: 30px;">
+        <form hx-get="/relatorios" hx-target="#content" hx-push-url="true" hx-trigger="submit, refreshReports from:body"
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end;">
+
+            <div>
+                <label
+                    style="font-weight: bold; display: block; margin-bottom: 5px; font-size: 0.9rem;">Equipamento</label>
+                <input type="text" name="collector_name" value="{{ filters.collector_name or '' }}" class="magalu-input"
+                    placeholder="Ex: COL290_001">
+            </div>
+
+            <div>
+                <label
+                    style="font-weight: bold; display: block; margin-bottom: 5px; font-size: 0.9rem;">Colaborador</label>
+                <input type="text" name="employee_name" value="{{ filters.employee_name or '' }}" class="magalu-input"
+                    placeholder="Nome">
+            </div>
+
+            <div>
+                <label style="font-weight: bold; display: block; margin-bottom: 5px; font-size: 0.9rem;">Início</label>
+                <input type="date" name="start_date" value="{{ filters.start_date or '' }}" class="magalu-input">
+            </div>
+
+            <div>
+                <label style="font-weight: bold; display: block; margin-bottom: 5px; font-size: 0.9rem;">Fim</label>
+                <input type="date" name="end_date" value="{{ filters.end_date or '' }}" class="magalu-input">
+            </div>
+
+            {% if user.user_level == 10 %}
+            <div>
+                <label style="font-weight: bold; display: block; margin-bottom: 5px; font-size: 0.9rem;">CD</label>
+                <input type="number" name="cd" value="{{ filters.cd or '' }}" class="magalu-input"
+                    placeholder="Ex: 290">
+            </div>
+            {% endif %}
+
+            <div>
+                <label style="font-weight: bold; display: block; margin-bottom: 5px; font-size: 0.9rem;">Status</label>
+                <select name="status" class="magalu-input">
+                    <option value="ativo" {{ 'selected' if filters.status=='ativo' }}>Apenas em Uso</option>
+                    <option value="tudo" {{ 'selected' if filters.status=='tudo' }}>Todos (Histórico)</option>
+                </select>
+            </div>
+
+            <div>
+                <label style="font-weight: bold; display: block; margin-bottom: 5px; font-size: 0.9rem;">Tipo de Equipamento</label>
+                <select name="equipment_type" class="magalu-input">
+                    <option value="" {{ 'selected' if not filters.equipment_type }}>Todos</option>
+                    <option value="coletor" {{ 'selected' if filters.equipment_type=='coletor' }}>Coletor</option>
+                    {# Adicione novos tipos aqui no futuro: #}
+                    {# <option value="rf" {{ 'selected' if filters.equipment_type=='rf' }}>RF</option> #}
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="magalu-btn" style="height: 40px; font-size: 0.9rem;">Filtrar</button>
+                <button type="button" class="magalu-btn" style="height: 40px; font-size: 0.9rem; background: #6c757d;"
+                    hx-get="/relatorios" hx-target="#content">Limpar</button>
+
+                {% if user.user_level >= 9 %}
+                <a href="/relatorios/exportar-xls?collector_name={{ filters.collector_name or '' }}&employee_name={{ filters.employee_name or '' }}&start_date={{ filters.start_date or '' }}&end_date={{ filters.end_date or '' }}&cd={{ filters.cd or '' }}&status={{ filters.status or '' }}&equipment_type={{ filters.equipment_type or '' }}"
+                    class="magalu-btn"
+                    style="height: 40px; font-size: 0.9rem; background: #2e7d32; text-decoration: none; display: flex; align-items: center; justify-content: center; padding: 0 15px;"
+                    download>
+                    📥 Exportar Excel (XLS)
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Placeholder para Feedback de Devolução -->
+    <div id="return-feedback"></div>
+
+    <!-- Tabela -->
+    <div style="overflow-x: auto;">
+        <table class="magalu-table">
+            <thead>
+                <tr>
+                    <th>Equipamento</th>
+                    <th>Colaborador</th>
+                    {% if user.user_level == 10 %}
+                    <th style="text-align: center;">CD</th>
+                    {% endif %}
+                    <th style="text-align: center;">Saída</th>
+                    <th style="text-align: center;">Retorno</th>
+                    <th style="text-align: center;">Tempo</th>
+                    <th style="text-align: center;">Tipo</th>
+                    {% if user.user_level >= 9 %}
+                    <th style="text-align: center;">Ações</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for attr in attributions %}
+                {% set hours = 0 %}
+                {% if not attr.checkin_time %}
+                {% set diff = now - attr.checkout_time %}
+                {% set hours = diff.total_seconds() / 3600 %}
+                {% endif %}
+
+                {% set bg_color = 'transparent' %}
+                {% if not attr.checkin_time %}
+                {% if hours > 12 %}
+                {% set bg_color = '#fff5f5' %} <!-- Vermelho sutil -->
+                {% elif hours > 10 %}
+                {% set bg_color = '#fffdf0' %} <!-- Amarelo sutil -->
+                {% endif %}
+                {% endif %}
+
+                <tr style="background-color: {{ bg_color }};">
+                    <td style="font-weight: 600;">{{ attr.coletor.name }}</td>
+                    <td>{{ attr.colaborador.name }}</td>
+                    {% if user.user_level == 10 %}
+                    <td style="text-align: center;">{{ attr.coletor.cd }}</td>
+                    {% endif %}
+                    <td style="text-align: center; font-size: 0.85rem;">
+                        {{ attr.checkout_time.strftime('%d/%m/%Y %H:%M') }}
+                    </td>
+                    <td style="text-align: center; font-size: 0.85rem;">
+                        {% if attr.checkin_time %}
+                        {{ attr.checkin_time.strftime('%d/%m/%Y %H:%M') }}
+                        {% else %}
+                        <span class="badge badge-active">EM USO</span>
+                        {% endif %}
+                    </td>
+                    <td
+                        style="text-align: center; font-weight: bold; color: {{ '#d32f2f' if hours > 12 else '#ffa000' if hours > 10 else '#2e7d32' if not attr.checkin_time else '#666' }};">
+                        {% if not attr.checkin_time %}
+                        {{ hours|round(1) }}h
+                        {% else %}
+                        {% set duration = attr.checkin_time - attr.checkout_time %}
+                        {{ (duration.total_seconds() / 3600)|round(1) }}h
+                        {% endif %}
+                    </td>
+                    <td style="text-align: center;">
+                        <span style="font-size: 0.8rem; background: #e3f2fd; color: #1565c0; padding: 2px 8px; border-radius: 12px;">{{ attr.equipment_type or 'coletor' }}</span>
+                    </td>
+                    {% if user.user_level >= 9 %}
+                    <td style="text-align: center;">
+                        {% if not attr.checkin_time %}
+                        <button class="magalu-btn"
+                            style="padding: 4px 10px; font-size: 0.8rem; background: #d32f2f; width: auto;"
+                            hx-post="/atribuicoes/devolver"
+                            hx-vals='{"attribution_id": {{ attr.id }}, "origin": "reports"}'
+                            hx-target="#return-feedback"
+                            hx-confirm="Confirmar devolução do coletor {{ attr.coletor.name }}?">
+                            Devolver
+                        </button>
+                        {% endif %}
+                    </td>
+                    {% endif %}
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="{{ 6 if user.user_level == 10 else 5 }}"
+                        style="text-align: center; color: #666; padding: 30px;">
+                        Nenhuma atribuição encontrada para os filtros aplicados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

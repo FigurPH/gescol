@@ -1,0 +1,37 @@
+<div class="welcome-card" style="max-width: 600px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="color: var(--magalu-blue);">Editar Colaborador</h2>
+        <button hx-get="/colaboradores" hx-target="#content" class="magalu-btn"
+            style="width: auto; background: #666;">Cancelar</button>
+    </div>
+
+    <form hx-post="/colaboradores/update/{{ employee.id }}" hx-target="#content">
+        <div style="margin-bottom: 15px;">
+            <label style="font-weight: bold;">ID Magalu</label>
+            <input type="number" name="id_magalu" class="magalu-input" value="{{ employee.matricula }}" required>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label style="font-weight: bold;">Nome Completo</label>
+            <input type="text" name="name" class="magalu-input" value="{{ employee.name }}" required>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label style="font-weight: bold;">Cargo</label>
+            <input type="text" name="role" class="magalu-input" value="{{ employee.cargo }}" required>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label style="font-weight: bold;">Turno</label>
+            <select name="turno" class="magalu-input" required>
+                <option value="0" {% if employee.turno == 0 %}selected{% endif %}>ADM</option>
+                <option value="1" {% if employee.turno == 1 %}selected{% endif %}>1ºT</option>
+                <option value="2" {% if employee.turno == 2 %}selected{% endif %}>2ºT</option>
+                <option value="3" {% if employee.turno == 3 %}selected{% endif %}>3ºT</option>
+            </select>
+        </div>
+        <div style="margin-bottom: 20px;">
+            <label style="font-weight: bold;">CD</label>
+            <input type="text" name="cd" class="magalu-input" value="{{ employee.filial }}" {% if admin_level==9
+                %}readonly style="background: #f0f0f0;" {% endif %} maxlength="4" required>
+        </div>
+        <button type="submit" class="magalu-btn">Salvar Alterações</button>
+    </form>
+</div>

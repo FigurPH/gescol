@@ -1,0 +1,87 @@
+<div class="welcome-card" style="animation: fadeIn 0.3s; max-width: 1200px; margin: 0 auto;">
+    <h2 style="color: var(--magalu-blue); margin-bottom: 25px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">
+        📲 Saída de Equipamento
+    </h2>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+
+        <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; border: 1px solid #e0e0e0;">
+            <form hx-post="/atribuicoes/salvar" hx-target="#attribution-message" hx-swap="innerHTML"
+                hx-include="#employee-result">
+
+                <div style="margin-bottom: 25px;">
+                    <label style="font-weight: bold; display: block; margin-bottom: 8px;">Matrícula Colaborador</label>
+                    <input type="text" name="registration" id="registration" class="magalu-input" placeholder="000000"
+                        required style="font-size: 1.2rem; letter-spacing: 5px; text-align: center;" maxlength="6"
+                        hx-get="/atribuicoes/buscar-colaborador" hx-trigger="keyup[this.value.length==6], blur"
+                        hx-target="#employee-result">
+                    <small style="color: #666; display: block; margin-top: 5px;">Digite os 6 números da
+                        matrícula</small>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="font-weight: bold; display: block; margin-bottom: 8px;">Número de Série do
+                        Equipamento</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="text" name="serialnumber" id="serialnumber" class="magalu-input"
+                            placeholder="Ex: XPTO123456789" style="font-size: 1.2rem; font-weight: bold;">
+                    </div>
+                </div>
+
+                <div id="attribution-message" style="margin-bottom: 15px;"></div>
+
+                <button type="submit" class="magalu-btn"
+                    style="width: 100%; height: 50px; font-size: 1.1rem; margin-top: 10px;">
+                    Confirmar Entrega
+                </button>
+            </form>
+        </div>
+
+        <div id="employee-result"
+            style="background: white; border-radius: 12px; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; min-height: 250px;">
+            <div style="text-align: center; color: #999; padding: 20px;">
+                <p style="font-size: 3rem; margin-bottom: 10px;">👤</p>
+                <p>Aguardando leitura da matrícula...</p>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    // Foco automático no campo de matrícula ao carregar
+    const regInput = document.getElementById('registration');
+    const snInput = document.getElementById('serialnumber');
+
+    regInput.focus();
+
+    regInput.addEventListener('focus', function (e) {
+        this.value = '';
+        document.getElementById('employee-result').innerHTML = `
+            <div style="text-align: center; color: #999; padding: 20px;">
+                <p style="font-size: 3rem; margin-bottom: 10px;">👤</p>
+                <p>Aguardando leitura da matrícula...</p>
+            </div>
+        `;
+    });
+
+    regInput.addEventListener('input', function (e) {
+        // Garante que sejam apenas números
+        this.value = this.value.replace(/\D/g, '');
+
+        // Se chegar em 6 dígitos, pula para o campo do número de série
+        if (this.value.length === 6) {
+            snInput.focus();
+        }
+    });
+
+    // Também pula o foco no evento de perda de foco do HTMX se houver sucesso
+    document.body.addEventListener('htmx:afterOnLoad', function (evt) {
+        if (evt.detail.target.id === 'employee-result') {
+            if (regInput.value.length === 6 && !evt.detail.xhr.responseText.includes('Matrícula inválida')) {
+                snInput.focus();
+            }
+        }
+    });
+</script>

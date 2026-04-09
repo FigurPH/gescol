@@ -1,0 +1,103 @@
+<div class="welcome-card" style="animation: fadeIn 0.3s;">
+    <h2 style="color: var(--magalu-blue); margin-bottom: 25px;">📊 Dashboard de Ativos</h2>
+
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px; align-items: start;">
+
+        <div
+            style="background: white; padding: 25px; border-radius: 12px; border: 1px solid #eee; text-align: center; box-shadow: var(--shadow);">
+            <canvas id="chartColetores" style="max-height: 280px;"></canvas>
+            <div style="margin-top: 20px;">
+                <h3 style="color: #444; margin: 0;">Total Geral</h3>
+                <p style="color: #888; font-size: 0.9rem;">Consolidado de todos os CDs</p>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            {% for s in stats %}
+            <div class="card-hub"
+                style="display: flex; justify-content: space-between; align-items: center; padding: 20px 25px; text-align: left; cursor: default; border-left: 5px solid var(--magalu-blue);">
+                <div style="flex: 1;">
+                    <strong style="font-size: 1.3rem; color: var(--magalu-blue);">CD {{ s.cd }}</strong>
+                    <div style="display: flex; gap: 15px; margin-top: 10px;">
+                        <span style="color: #666; font-size: 0.9rem;">📦 Total: <strong>{{ s.disponiveis + s.atribuidos + s.inativos }}</strong></span>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <div style="text-align: center; min-width: 80px;">
+                        <div style="color: var(--success); font-weight: 800; font-size: 1.2rem;">{{ s.disponiveis }}
+                        </div>
+                        <div style="font-size: 0.7rem; text-transform: uppercase; color: #999;">Livres</div>
+                    </div>
+                    <div style="text-align: center; min-width: 80px;">
+                        <div style="color: var(--warning); font-weight: 800; font-size: 1.2rem;">{{ s.atribuidos }}
+                        </div>
+                        <div style="font-size: 0.7rem; text-transform: uppercase; color: #999;">Em Uso</div>
+                    </div>
+                    <div style="text-align: center; min-width: 80px;">
+                        <div style="color: var(--danger); font-weight: 800; font-size: 1.2rem;">{{ s.inativos }}</div>
+                        <div style="font-size: 0.7rem; text-transform: uppercase; color: #999;">Inativos</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    (function () {
+        function initChart() {
+            const canvas = document.getElementById('chartColetores');
+            if (!canvas) return;
+
+            // Destroy any existing chart instance to prevent errors on re-rendering
+            if (window.coletoresChart instanceof Chart) {
+                window.coletoresChart.destroy();
+            }
+
+            const ctx = canvas.getContext('2d');
+            window.coletoresChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Livres', 'Em Uso', 'Inativos'],
+                    datasets: [{
+                        data: [{{ total_disp }}, {{ total_atrib }}, {{ total_inat }}],
+        backgroundColor: ['#2e7d32', '#ffa000', '#d32f2f'],
+            hoverOffset: 15,
+                borderWidth: 0,
+                    spacing: 5
+    }]
+                },
+    options: {
+        cutout: '75%',
+            plugins: {
+            legend: {
+                position: 'bottom',
+                    labels: {
+                    padding: 20,
+                        font: { size: 13, weight: '600' },
+                    usePointStyle: true
+                }
+            }
+        }
+    }
+            });
+        }
+
+    // Wait for Chart.js to be available
+    if (typeof Chart !== 'undefined') {
+        initChart();
+    } else {
+        const scriptTag = document.querySelector('script[src="https://cdn.jsdelivr.net/npm/chart.js"]');
+        if (scriptTag) {
+            scriptTag.addEventListener('load', initChart);
+        } else {
+            // Fallback timeout in case of unpredictable delayed loads
+            setTimeout(initChart, 500);
+        }
+    }
+    }) ();
+</script>

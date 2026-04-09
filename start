@@ -1,0 +1,15 @@
+#!/bin/bash
+# start_wsl.sh
+# Inicia os serviços localmente no WSL
+
+echo "Garantindo que PostgreSQL e Apache estão rodando..."
+sudo service postgresql start
+sudo service apache2 start
+
+echo "Iniciando Uvicorn..."
+cd "$(dirname "$0")"
+source venv/bin/activate
+export PYTHONPATH=$PWD
+# Inicia uvicorn sem prender o terminal (background) e direcionando todas saídas para o .log
+nohup uvicorn src.main:app --host 127.0.0.1 --port 8000 --reload --env-file .env > logs/uvicorn.log 2>&1 &
+echo "Uvicorn está rodando em background (logs salvos em uvicorn.log)"

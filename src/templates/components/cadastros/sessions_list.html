@@ -1,0 +1,86 @@
+<div class="welcome-card" style="max-width: 1000px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="color: var(--magalu-blue);">Sessões Ativas</h2>
+        <button hx-get="/cadastros/sessions" hx-target="#content" class="btn-refresh">🔄 Atualizar</button>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Usuário</th>
+                    <th>Nível</th>
+                    <th>Status</th>
+                    <th>Última Atividade</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr id="user-row-{{ user.id }}">
+                    <td><strong>{{ user.username }}</strong></td>
+                    <td><span class="badge">{{ user.user_level }}</span></td>
+                    <td>
+                        {% if now - user.last_activity < 300 %}
+                        <span class="status-online">● Online</span>
+                        {% else %}
+                        <span class="status-away">● Inativo</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ (now - user.last_activity) // 60 }} min atrás
+                    </td>
+                    <td>
+                        {% if user.user_level < 10 %}
+                        <button 
+                            hx-post="/cadastros/sessions/terminate/{{ user.id }}" 
+                            hx-confirm="Tem certeza que deseja encerrar a sessão de {{ user.username }}?"
+                            hx-target="#user-row-{{ user.id }}"
+                            hx-swap="outerHTML"
+                            class="btn-danger-sm">
+                            Encerrar Sessão
+                        </button>
+                        {% else %}
+                        <span style="color: #999; font-size: 0.8rem;">(Superadmin)</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .btn-refresh {
+        background: #f0f0f0;
+        border: 1px solid #ccc;
+        padding: 5px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .btn-refresh:hover { background: #e0e0e0; }
+
+    .btn-danger-sm {
+        background: #ffebee;
+        color: #c62828;
+        border: 1px solid #ef9a9a;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        cursor: pointer;
+    }
+    .btn-danger-sm:hover { background: #ef9a9a; color: white; }
+
+    .status-online { color: #4caf50; font-weight: bold; font-size: 0.9rem; }
+    .status-away { color: #ffa000; font-weight: bold; font-size: 0.9rem; }
+
+    .badge {
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+</style>
