@@ -10,8 +10,8 @@ from src.core.csv_importer import CsvImporter
 from src.core.templates import templates
 from src.database.db_session import get_db
 from src.database.models.colaborador_model import Colaborador
-
 from src.core.logger import log
+from src.core.ui_components import UIComponents
 
 router = APIRouter(prefix="/colaboradores")
 
@@ -58,10 +58,7 @@ async def delete_employee(
             log.warning(
                 f"LOG: {admin.username} - Tentativa de exclusão negada (CD incompatível): {employee.name}"
             )
-            return HTMLResponse(
-                "<script>alert('Acesso negado: CD diferente');</script>",
-                status_code=403,
-            )
+            return UIComponents.error_badge("Acesso negado: CD diferente")
 
         await db.delete(employee)
         await db.commit()
@@ -97,10 +94,7 @@ async def save_employee(
     target_cd = format_cd(cd)
 
     if admin.is_cd_restricted and not same_cd(target_cd, admin.cd):
-        return HTMLResponse(
-            "<div class='welcome-card'><h3 style='color:red'>Erro: CD não autorizado.</h3>"
-            "<button hx-get='/colaboradores' hx-target='#content' class='magalu-btn'>Voltar</button></div>"
-        )
+        return UIComponents.error_card("Erro: CD não autorizado.", back_url="/colaboradores")
 
     try:
         db.add(
@@ -117,10 +111,7 @@ async def save_employee(
     except IntegrityError:
         await db.rollback()
         log.error(f"LOG: {admin.username} - Erro: Matrícula {id_magalu} já existe")
-        return HTMLResponse(
-            "<div class='welcome-card'><h3 style='color:red'>Erro: ID Magalu já cadastrado.</h3>"
-            "<button hx-get='/colaboradores/novo' hx-target='#content' class='magalu-btn'>Tentar Novamente</button></div>"
-        )
+        return UIComponents.error_card("Erro: ID Magalu já cadastrado.", back_url="/colaboradores/novo")
 
     return await list_employees(request, db, admin)
 
@@ -141,7 +132,7 @@ async def edit_employee_form(
 
     if admin.is_cd_restricted and not same_cd(employee.filial, admin.cd):
         log.warning(f"LOG: {admin.username} - Acesso negado ao colaborador {employee.name}")
-        return HTMLResponse("Acesso negado", status_code=403)
+        return UIComponents.error_card("Acesso negado", back_url="/colaboradores")
 
     return templates.TemplateResponse(
         "components/cadastros/colaborador/employee_edit_form.html",
@@ -166,7 +157,7 @@ async def update_employee(
     employee = result.scalar_one_or_none()
 
     if not employee:
-        return HTMLResponse("<span style='color:red'>Erro: Colaborador não encontrado.</span>")
+        return UIComponents.error_badge("Erro: Colaborador não encontrado.")
 
     target_cd = format_cd(cd)
 
@@ -259,5 +250,5 @@ async def upload_employees_csv(
 
     except Exception as e:
         log.error(f"LOG: {admin.username} - Erro no upload CSV: {str(e)}")
-        return HTMLResponse(f"<div class='badge-inactive'>❌ Erro: {str(e)}</div>")
+        return UIComponents.error_badge(f"Erro: {str(e)}")
 
