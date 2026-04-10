@@ -1,23 +1,20 @@
-import datetime
-
 from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import HTMLResponse
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.dependencies import get_current_user
 from src.core.attribution_views import AttributionViews
 from src.core.cd_utils import same_cd
-from src.core.equipment_registry import EquipmentRegistry
 from src.core.templates import spa_response
 from src.database.db_session import get_db
 from src.auth.permissions import PermissionManager, Permission
-from src.database.models.atribuicao_model import Atribuicao
 from src.database.models.colaborador_model import Colaborador
 from src.core.logger import log
 
 
+
+from src.core.attribution_service import AttributionService
 
 router = APIRouter(prefix="/atribuicoes")
 
@@ -45,17 +42,11 @@ async def lookup_employee(
     db: AsyncSession = Depends(get_db),
     user=Depends(get_current_user),
 ):
-    """
-    Busca os dados de um colaborador pelo ID Magalu (matrícula).
-    Valida se o colaborador pertence ao mesmo CD do operador (se restrito).
-    Verifica se o colaborador já possui um equipamento em uso.
-    """
+    """Busca dados de um colaborador e verifica se possui equipamentos em uso."""
     if not registration.isdigit() or len(registration) != 6:
         return AttributionViews.error_invalid_registration()
 
-    result = await db.execute(
-        select(Colaborador).filter(Colaborador.matricula == registration)
-    )
+    result = await db.execute(select(Colaborador).filter(Colaborador.matricula == registration))
     employee = result.scalar_one_or_none()
 
     if not employee:
@@ -63,18 +54,11 @@ async def lookup_employee(
 
     # Validação de CD
     if user.is_cd_restricted and not same_cd(employee.filial, user.cd):
-        log.warning(f"LOG: {user.username} - Acesso negado ao CD {employee.filial} (Usuário do CD {user.cd})")
+        log.warning(f"LOG: {user.username} - Bloqueio CD: {employee.filial} (Usuário: {user.cd})")
         return AttributionViews.error_cd_mismatch(employee.filial)
 
-    # Buscar atribuição ativa
-    result_attr = await db.execute(
-        select(Atribuicao)
-        .options(joinedload(Atribuicao.coletor))
-        .filter(
-            Atribuicao.colaborador_id == employee.id, Atribuicao.checkin_time.is_(None)
-        )
-    )
-    active_attr = result_attr.scalar_one_or_none()
+    # Buscar atribuição ativa via Serviço
+    active_attr = await AttributionService.get_active_attribution_for_employee(db, employee.id)
 
     if active_attr:
         return AttributionViews.info_employee_with_collector(
@@ -106,90 +90,44 @@ async def save_attribution(
     db: AsyncSession = Depends(get_db),
     user=Depends(get_current_user),
 ):
-    """
-    Processa o checkout (atribuição) ou encaminha para return_attribution se houver attribution_id.
-    """
-    # Fluxo de devolução delegado
+    """Processa o checkout (atribuição) via serviço."""
     if attribution_id:
-        return await return_attribution(
-            request=request,
-            attribution_id=attribution_id,
-            origin=None,
-            serialnumber=serialnumber,
-            db=db,
-            user=user,
-        )
+        return await return_attribution(request, attribution_id, None, serialnumber, db, user)
 
     if not employee_id:
-        log.error(f"LOG: {user.username} - Erro: Colaborador não informado")
         return AttributionViews.error_no_employee_selected()
 
     if not serialnumber or not serialnumber.strip():
-        log.error(f"LOG: {user.username} - Erro: SN não informado")
         return AttributionViews.error_no_serialnumber()
 
-    # Busca o equipamento pelo número de série em todas as tabelas registradas
-    equipment, equipment_type = await EquipmentRegistry.find_by_serialnumber(
-        serialnumber, db
+    # Executa lógica de checkout via Serviço
+    success, error_code, eq_name, emp_name = await AttributionService.validate_and_save_checkout(
+        db=db,
+        user_id=user.id,
+        user_username=user.username,
+        user_cd=user.cd or "N/A",
+        is_cd_restricted=user.is_cd_restricted,
+        employee_id=employee_id,
+        serialnumber=serialnumber
     )
 
-    if not equipment:
-        log.error(f"LOG: {user.username} - Equipamento SN '{serialnumber}' não encontrado")
-        return AttributionViews.error_equipment_not_found(serialnumber)
+    if not success:
+        if error_code == "equipment_not_found":
+            return AttributionViews.error_equipment_not_found(serialnumber)
+        if error_code == "equipment_inactive":
+            return AttributionViews.error_equipment_inactive(eq_name)
+        if error_code == "equipment_in_use":
+            return AttributionViews.error_equipment_in_use()
+        if error_code == "employee_lookup_failed":
+            return AttributionViews.error_employee_lookup_failed()
+        if error_code == "cd_mismatch":
+            return AttributionViews.error_cd_mismatch(emp_name)
+        if error_code == "employee_already_busy":
+            return AttributionViews.error_employee_already_has_collector()
+        return AttributionViews.error_attribution_not_identified()
 
-    if not equipment.is_active:
-        log.error(f"LOG: {user.username} - Equipamento {equipment.name} inativo")
-        return AttributionViews.error_equipment_inactive(equipment.name)
-
-    # Verifica se o equipamento já está em uso
-    result_busy = await db.execute(
-        select(Atribuicao).filter(
-            Atribuicao.coletor_id == equipment.id, Atribuicao.checkin_time.is_(None)
-        )
-    )
-    if result_busy.scalar_one_or_none():
-        log.error(f"LOG: {user.username} - Equipamento {equipment.name} já está em uso")
-        return AttributionViews.error_equipment_in_use()
-
-    result_emp = await db.execute(
-        select(Colaborador).filter(Colaborador.id == employee_id)
-    )
-    employee = result_emp.scalar_one_or_none()
-
-    if not employee:
-        return AttributionViews.error_employee_lookup_failed()
-
-    result_busy_emp = await db.execute(
-        select(Atribuicao).filter(
-            Atribuicao.colaborador_id == employee.id, Atribuicao.checkin_time.is_(None)
-        )
-    )
-    if result_busy_emp.scalar_one_or_none():
-        log.error(f"LOG: {user.username} - Colaborador {employee.name} já possui equipamento")
-        return AttributionViews.error_employee_already_has_collector()
-
-    from sqlalchemy.exc import IntegrityError
-    try:
-        db.add(
-            Atribuicao(
-                coletor_id=equipment.id,
-                colaborador_id=employee.id,
-                user_id=user.id,
-                equipment_type=equipment_type,
-                checkout_time=datetime.datetime.now(),
-            )
-        )
-        await db.commit()
-    except IntegrityError:
-        await db.rollback()
-        log.error(f"LOG: {user.username} - Conflito de concorrência: Equipamento {equipment.name} já foi atribuído")
-        return AttributionViews.error_equipment_in_use()
-
-    log.info(
-        f"LOG: {user.username} - Saída: {equipment_type} '{equipment.name}' → {employee.name}"
-    )
-
-    return AttributionViews.success_checkout(equipment.name, employee.name)
+    log.info(f"LOG: {user.username} - checkout: {eq_name} -> {emp_name}")
+    return AttributionViews.success_checkout(eq_name, emp_name)
 
 
 @router.post("/devolver")
@@ -201,45 +139,27 @@ async def return_attribution(
     db: AsyncSession = Depends(get_db),
     user=Depends(get_current_user),
 ):
-    """
-    Processa o checkin (devolução) de um equipamento.
-    Exige redigitação do SN para confirmação (exceto via relatórios).
-    """
+    """Processa o checkin (devolução) via serviço."""
     if not attribution_id:
         return AttributionViews.error_attribution_not_identified()
 
-    result = await db.execute(
-        select(Atribuicao)
-        .options(joinedload(Atribuicao.coletor), joinedload(Atribuicao.colaborador))
-        .filter(Atribuicao.id == attribution_id)
+    success, error_code, eq_name, emp_name = await AttributionService.perform_checkin(
+        db=db,
+        attribution_id=attribution_id,
+        informed_sn=serialnumber,
+        bypass_sn_check=(origin == "reports")
     )
-    attribution = result.scalar_one_or_none()
 
-    if not attribution:
-        return AttributionViews.error_attribution_not_found()
+    if not success:
+        if error_code == "attribution_not_found":
+            return AttributionViews.error_attribution_not_found()
+        if error_code == "wrong_equipment":
+            return AttributionViews.error_wrong_equipment(informed_sn=serialnumber)
+        return AttributionViews.error_attribution_not_identified()
 
-    # Dupla verificação do equipamento (fora do fluxo de relatórios)
-    if origin != "reports":
-        if not serialnumber or not serialnumber.strip():
-            return AttributionViews.error_no_return_serialnumber()
-
-        informed_sn = serialnumber.strip().upper()
-        attributed_sn = (attribution.coletor.serialnumber or "").upper()
-
-        if informed_sn != attributed_sn:
-            log.warning(f"LOG: {user.username} - SN incorreto na devolução: {informed_sn} != {attributed_sn}")
-            return AttributionViews.error_wrong_equipment(informed_sn=informed_sn)
-
-    attribution.checkin_time = datetime.datetime.now()
-    await db.commit()
-
-    equipment_name = attribution.coletor.name
-    employee_name = attribution.colaborador.name
-
-    log.info(f"LOG: {user.username} - Devolução: {equipment_name} ← {employee_name} ({origin or 'direta'})")
-
+    log.info(f"LOG: {user.username} - devolução: {eq_name} <- {emp_name}")
+    
     if origin == "reports":
-        return AttributionViews.success_checkin_from_reports(equipment_name, employee_name)
-
-    return AttributionViews.success_checkin(equipment_name, employee_name)
+        return AttributionViews.success_checkin_from_reports(eq_name, emp_name)
+    return AttributionViews.success_checkin(eq_name, emp_name)
 
