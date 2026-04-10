@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Verifica se o alvo da resposta foi o resultado do colaborador
         if (evt.detail && evt.detail.target && evt.detail.target.id === 'employee-result') {
             const regInput = document.getElementById('registration');
-            const collInput = document.getElementById('collector_number');
+            const collInput = document.getElementById('serialnumber');
 
             if (regInput && collInput && regInput.value.length === 6 &&
                 !evt.detail.xhr.responseText.includes('Matrícula inválida')) {
