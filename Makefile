@@ -19,6 +19,8 @@ help:
 	@echo "  make logs    - Acompanha os logs de erro do Apache"
 	@echo "  make db      - Acessa o console local do banco de dados (PostgreSQL)"
 	@echo "  make init    - Configura banco de dados e executa migrações iniciais"
+	@echo "  make test    - Executa a suíte de testes (pytest)"
+	@echo "  make test-cov - Executa os testes com relatório de cobertura (coverage)"
 	@echo "  make clean   - Remove arquivos temporários do Python (__pycache__)"
 	@echo "========================================================================"
 
@@ -28,7 +30,15 @@ setup:
 
 install:
 	@echo "Instalando/atualizando dependências do Python..."
-	$(PIP) install -r requirements
+	$(PIP) install -r requirements.txt
+
+test:
+	@echo "Executando testes automatizados..."
+	$(PYTHON) -m pytest tests/
+
+test-cov:
+	@echo "Executando testes com cobertura de código..."
+	$(PYTHON) -m pytest --cov=src tests/ --cov-report=term-missing
 
 run:
 	@echo "Iniciando serviços e o Uvicorn..."

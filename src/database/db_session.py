@@ -12,11 +12,16 @@ import src.database.models.atribuicao_model  # noqa: F401
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-engine = create_async_engine(DATABASE_URL, echo=False, future=True)
+# Engine e Sessionmaker criados globalmente, mas passíveis de reconfiguração
+engine = create_async_engine(DATABASE_URL, echo=False, future=True) if DATABASE_URL else None
 AsyncSessionLocal = async_sessionmaker(
     engine, class_=AsyncSession, expire_on_commit=False
-)
-log.info(f"Conectado ao banco de dados: {engine}")
+) if engine else None
+
+if engine:
+    log.info(f"Conectado ao banco de dados: {engine.url}")
+else:
+    log.warning("DATABASE_URL não definida. O sistema pode falhar se o banco for acessado sem override.")
 
 
 async def init_db():

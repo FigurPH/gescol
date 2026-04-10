@@ -61,12 +61,16 @@ O sistema utiliza **Gunicorn** com workers **Uvicorn** para garantir alta perfor
 | `make restart` | Reinicia Apache e PostgreSQL |
 | `make logs` | Acompanha os logs de erro em tempo real |
 | `make db` | Acessa o console interativo do PostgreSQL |
+| `make test` | Executa a suíte completa de testes |
+| `make test-cov` | Executa testes com relatório de cobertura |
 
 ## 📁 Documentação Adicional
 Para detalhes técnicos avançados, consulte a pasta `docs/`:
 - [Ficha Técnica](docs/1-ficha-tecnica.md)
 - [Stack de Software](docs/2-stack-software.md)
 - [Níveis de Acesso e Segurança](docs/3-niveis-de-acesso.md)
+- [Estrutura do Banco de Dados](docs/4-banco-de-dados.md)
+- [Manual de Testes](docs/5-testes.md)
 
 ---
 **Desenvolvimento**: Mantenedores do GesCol

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Index
 from sqlalchemy.orm import relationship
 from src.database.models.base import Base  # Import de metadados
 from datetime import datetime
@@ -15,6 +15,16 @@ class Atribuicao(Base):
 
     checkout_time = Column(DateTime, nullable=False, default=datetime.now())
     checkin_time = Column(DateTime, nullable=True)
+
+    # Restrição de Race Condition: Apenas uma atribuição ativa por coletor
+    __table_args__ = (
+        Index(
+            "idx_active_coletor",
+            "coletor_id",
+            unique=True,
+            sqlite_where=checkin_time.is_(None),
+        ),
+    )
 
     coletor = relationship(
         "Coletor",

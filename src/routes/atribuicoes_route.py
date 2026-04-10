@@ -168,16 +168,22 @@ async def save_attribution(
         log.error(f"LOG: {user.username} - Colaborador {employee.name} já possui equipamento")
         return AttributionViews.error_employee_already_has_collector()
 
-    db.add(
-        Atribuicao(
-            coletor_id=equipment.id,
-            colaborador_id=employee.id,
-            user_id=user.id,
-            equipment_type=equipment_type,
-            checkout_time=datetime.datetime.now(),
+    from sqlalchemy.exc import IntegrityError
+    try:
+        db.add(
+            Atribuicao(
+                coletor_id=equipment.id,
+                colaborador_id=employee.id,
+                user_id=user.id,
+                equipment_type=equipment_type,
+                checkout_time=datetime.datetime.now(),
+            )
         )
-    )
-    await db.commit()
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        log.error(f"LOG: {user.username} - Conflito de concorrência: Equipamento {equipment.name} já foi atribuído")
+        return AttributionViews.error_equipment_in_use()
 
     log.info(
         f"LOG: {user.username} - Saída: {equipment_type} '{equipment.name}' → {employee.name}"
