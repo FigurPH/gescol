@@ -3,7 +3,7 @@ PYTHON = venv/bin/python
 PIP = venv/bin/pip
 UVICORN = venv/bin/uvicorn
 
-.PHONY: help setup install run stop restart logs db clean init stress
+.PHONY: help setup install run stop restart logs db clean init
 
 help:
 	@echo "========================================================================"
@@ -21,7 +21,6 @@ help:
 	@echo "  make init    - Configura banco de dados e executa migrações iniciais"
 	@echo "  make test    - Executa a suíte de testes (pytest)"
 	@echo "  make test-cov - Executa os testes com relatório de cobertura (coverage)"
-	@echo "  make stress  - Executa teste de carga (Locust) e gera dashboard SRE"
 	@echo "  make clean   - Remove arquivos temporários do Python (__pycache__)"
 	@echo "========================================================================"
 
@@ -40,15 +39,6 @@ test:
 test-cov:
 	@echo "Executando testes com cobertura de código..."
 	$(PYTHON) -m pytest --cov=src tests/ --cov-report=term-missing
-
-stress:
-	@echo "Iniciando Teste de Stress (SRE)... Certifique-se de que o app está rodando (make run)"
-	cd performance && ./monitor.sh start
-	@echo "Aguarde, rodando Locust em modo headless..."
-	cd performance && ../venv/bin/locust -f locustfile.py --headless -H http://localhost:8000
-	cd performance && ./monitor.sh stop
-	@echo "Gerando dashboard de métricas..."
-	cd performance && ../venv/bin/python3 analyze_metrics.py
 
 run:
 	@echo "Iniciando serviços e o Uvicorn..."
