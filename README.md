@@ -2,7 +2,7 @@
   <h1>📦 GesCol - Gestor de Coletores</h1>
   <p><i>Sistema robusto de gerenciamento de coletores de dados e colaboradores, otimizado para operações de larga escala (Magalu Style).</i></p>
   
-  ![Python](https://img.shields.io/badge/Python-3.12-blue?style=for-the-badge&logo=python) 
+  ![Python](https://img.shields.io/badge/Python-3.10+-blue?style=for-the-badge&logo=python) 
   ![FastAPI](https://img.shields.io/badge/FastAPI-0.109.0-009688?style=for-the-badge&logo=fastapi) 
   ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Async-336791?style=for-the-badge&logo=postgresql)
   ![Gunicorn](https://img.shields.io/badge/Gunicorn-Multicore-green?style=for-the-badge&logo=gunicorn)
@@ -18,13 +18,29 @@ O **GesCol** é uma solução completa para o rastreamento e gestão de equipame
 - 🔐 **Controle de Acesso**: Hierarquia por nível de usuário e restrição geográfica por Filial/CD.
 - 📊 **Dashboard Analítica**: Visão em tempo real das atribuições ativas.
 - ⚡ **HTMX Ready**: Interface web fluida com atualizações dinâmicas sem recarga de página.
-- 🤖 **API First (v1)**: Endpoints REST prontos para integração com apps mobile e dispositivos industriais.
+- 🤖 **API REST (v1)**: Endpoints JSON para integração com apps mobile e dispositivos industriais (coletores implementados; demais entidades via interface web).
 - 🛡️ **Hardenizado**: Proteção contra Bruteforce (SlowAPI) e Cookies seguros (HTTPOnly).
 
 ## ⚙️ Pré-requisitos
 - **OS**: Linux (Debian, Ubuntu) ou WSL2.
 - **Python**: 3.10 ou superior.
-- **Infra**: PostgreSQL e Apache2.
+- **Infra**:
+  - **PostgreSQL** — Banco de dados principal (acesso assíncrono via asyncpg).
+  - **Apache2** — Reverse proxy que encaminha requisições para o Gunicorn (porta 8000).
+
+## 🔑 Variáveis de Ambiente
+
+A aplicação utiliza um arquivo `.env` na raiz do projeto para configuração. O script `make init` cria e atualiza esse arquivo automaticamente.
+
+| Variável | Descrição | Exemplo |
+|----------|-----------|---------|
+| `DATABASE_URL` | String de conexão assíncrona com o PostgreSQL | `postgresql+asyncpg://user:pass@localhost:5432/gescol_db` |
+| `GENERAL_DB_NAME` | Nome do banco de dados | `gescol_db` |
+| `GENERAL_DB_USER` | Usuário do banco de dados | `gescol` |
+| `GENERAL_DB_PASS` | Senha do usuário do banco de dados | `sua_senha_aqui` |
+
+> [!NOTE]
+> Não é necessário editar o `.env` manualmente. O `make init` solicita os dados interativamente e configura tudo para você.
 
 ## 🚀 Instalação e Setup Rápido
 

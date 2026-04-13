@@ -30,7 +30,7 @@ setup:
 
 install:
 	@echo "Instalando/atualizando dependências do Python..."
-	$(PIP) install -r requirements.txt
+	$(PIP) install -r requirements
 
 test:
 	@echo "Executando testes automatizados..."
