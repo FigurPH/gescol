@@ -63,6 +63,19 @@ O sistema utiliza **Gunicorn** com workers **Uvicorn** para garantir alta perfor
 | `make db` | Acessa o console interativo do PostgreSQL |
 | `make test` | Executa a suíte completa de testes |
 | `make test-cov` | Executa testes com relatório de cobertura |
+| `make stress` | Executa a suíte de testes de estresse (Locust) |
+
+## 🚀 Teste de Estresse (Performance)
+
+O sistema conta com uma suíte de testes de estresse de alta fidelidade localizada em `performance/`.
+
+### Como executar:
+1. Certifique-se de que o servidor está rodando (`make run`).
+2. Execute o orquestrador:
+   ```bash
+   ./performance/run_stress.sh
+   ```
+   *O script irá semear o banco, rodar ondas de 10, 20, 50 e 100 usuários, gerar relatórios CSV em `performance/results/` e limpar o banco ao final.*
 
 ## 📁 Documentação Adicional
 Para detalhes técnicos avançados, consulte a pasta `docs/`:

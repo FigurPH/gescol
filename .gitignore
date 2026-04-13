@@ -67,6 +67,8 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+performance/results/
+wave_*_users_*
 
 # Django stuff (if applicable)
 local_settings.py

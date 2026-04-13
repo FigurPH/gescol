@@ -3,7 +3,7 @@ PYTHON = venv/bin/python
 PIP = venv/bin/pip
 UVICORN = venv/bin/uvicorn
 
-.PHONY: help setup install run stop restart logs db clean init
+.PHONY: help setup install run stop restart logs db clean init test test-cov stress
 
 help:
 	@echo "========================================================================"
@@ -39,6 +39,10 @@ test:
 test-cov:
 	@echo "Executando testes com cobertura de código..."
 	$(PYTHON) -m pytest --cov=src tests/ --cov-report=term-missing
+
+stress:
+	@echo "Iniciando Teste de Estresse em Ondas..."
+	bash ./performance/run_stress.sh
 
 run:
 	@echo "Iniciando serviços e o Uvicorn..."
