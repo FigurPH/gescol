@@ -3,6 +3,13 @@
 
 # Arquivos de configuração
 # gescol.conf não deve ser ignorado para que o Apache seja configurado corretamente
+.claude/
+.claude
+.claude/*
+
+.qwen/
+.qwen
+.qwen/*
 
 # Ignorando arquivos de dados genéricos, mas mantendo templates
 *.csv
